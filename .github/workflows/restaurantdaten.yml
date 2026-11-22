@@ -1,0 +1,47 @@
+name: HEG Radio Restaurantdaten Deutschland
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 3 * * 0'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: heg-food-update
+  cancel-in-progress: false
+
+jobs:
+  datenbank:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - name: Repository abrufen
+        uses: actions/checkout@v4
+      - name: Python einrichten
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: OSM-Konverter installieren
+        run: python -m pip install --disable-pip-version-check 'osmium==4.3.2'
+      - name: Deutschland importieren
+        run: |
+          python -u deutschland_datenbank.py \
+            --arbeit "$RUNNER_TEMP/heg_food" \
+            --konverter "$GITHUB_WORKSPACE/osm_zu_sqlite.py" \
+            --python "$(which python)"
+      - name: SQLite pruefen und komprimieren
+        run: |
+          mkdir -p dist
+          python packen.py "$RUNNER_TEMP/heg_food/heg_food_deutschland.sqlite" \
+            dist/heg_food_osm.sqlite.gz dist/info.json
+          cp ODbL-HINWEIS.txt dist/ODbL-HINWEIS.txt
+      - name: Release erstellen oder aktualisieren
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if ! gh release view food-live >/dev/null 2>&1; then
+            gh release create food-live --title 'HEG Radio - Restaurants Deutschland' --notes 'OpenStreetMap/Geofabrik, ODbL 1.0. Woechentlicher Datenstand, keine garantierten Live-Oeffnungszeiten.'
+          fi
+          gh release upload food-live dist/heg_food_osm.sqlite.gz dist/info.json dist/ODbL-HINWEIS.txt --clobber

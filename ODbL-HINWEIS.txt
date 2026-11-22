@@ -1,0 +1,7 @@
+HEG Radio – Restaurants und Imbisse Deutschland
+Quelle: © OpenStreetMap-Mitwirkende (https://www.openstreetmap.org/copyright)
+OpenStreetMap-Datenbank-Lizenz: Open Database License (ODbL) 1.0.
+Original-Daten: Geofabrik (https://download.geofabrik.de/europe/germany.html)
+Diese extrahierte Datenbank wird unter der ODbL weitergegeben.
+Lizenztext: https://opendatacommons.org/licenses/odbl/1-0/
+Die enthaltenen Telefonnummern und Öffnungszeiten können unvollständig oder veraltet sein.
